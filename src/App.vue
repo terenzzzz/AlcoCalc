@@ -1,0 +1,274 @@
+
+<template>
+    <div class="bona-nova-sc-regular container" id="container">
+
+
+        <h1 class="text-center fs-1 fw-bold mt-5" >鸡尾酒酒精浓度计算器</h1>
+        <el-divider></el-divider>
+
+        <div id="result" class="text-center fs-1 fw-bold" :class="getABVClass(CalculatedABV)"> {{CalculatedABV}}% </div>
+
+        <!--            Select Box-->
+        <div class="row mt-3 ">
+                <strong>所使用的材料</strong>
+                <el-select
+                    v-model="selectedIngredients"
+                    multiple
+                    filterable
+                    placeholder="选择所使用的材料"
+                    size="large"
+                    clearable
+                    @change="onTagChange"
+                    @remove-tag="removeTag"
+                    @clear="clearTag"
+                >
+                    <el-option
+                        v-for="item in ingredients"
+                        :key="item.strIngredient1"
+                        :label="item.strIngredient1"
+                        :value="item.strIngredient1"
+                    />
+                </el-select>
+            </div>
+
+        <div class="row mt-5">
+            <div class="col-4" v-for="(ingredient, index) in savedIngredients" :key="index">
+                <div @click="onIngredientEdit(index)" class="d-flex">
+                    <div class="d-flex justify-content-center">
+                        <img
+                            :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`"
+                            class="img-fluid"
+                        />
+                    </div>
+                    <div class="d-flex flex-column justify-content-center">
+                        <p class="m-0">{{ ingredient.name }}</p>
+                        <p class="m-0" :class="getABVClass(ingredient.abv)">{{ ingredient.abv }} %</p>
+                        <p class="m-0">{{ ingredient.volume }} {{ ingredient.unit }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <el-dialog
+        v-model="centerDialogVisible"
+        title="进一步配置"
+        width="800"
+        align-center
+        :show-close="false"
+    >
+        <el-divider></el-divider>
+        <p>你选择的材料是：<strong>{{ selectingIngredient.name }}</strong></p>
+        <div class="row">
+            <div class="col-4">
+                <label for="abv" class="form-label">酒精度数（%）</label>
+                <input type="number" class="form-control" id="abv" v-model="selectingIngredient.abv" />
+            </div>
+            <div class="col-4">
+                <label for="volume" class="form-label">体积</label>
+                <input type="number" class="form-control" id="volume" v-model="selectingIngredient.volume" />
+            </div>
+            <div class="col-4">
+                <label for="unit" class="form-label">体积单位</label>
+                <el-select
+                    v-model="selectingUnit"
+                >
+                    <el-option
+                        v-for="item in unitList"
+                        :key="item"
+                        :label="item.label"
+                        :value="item.value"
+                    />
+                </el-select>
+
+
+            </div>
+        </div>
+        <el-divider></el-divider>
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button @click="cancelConfiguration">Cancel</el-button>
+                <el-button type="primary" @click="saveConfiguration">
+                    Confirm
+                </el-button>
+            </div>
+        </template>
+    </el-dialog>
+
+</template>
+
+<script setup>
+    // 导入 Vue 3 的 Composition API 和相关工具函数
+    import { onMounted, reactive, ref, computed, watch } from "vue";
+    // 导入 API 函数，用于获取鸡尾酒原料列表
+    import { listIngredients } from "@/api/cocktails.js";
+
+    // 定义单位列表，包含毫升（ml）和盎司（oz）
+    const unitList = [
+        { value: 'ml', label: 'ml' },
+        { value: 'oz', label: 'oz' }
+    ];
+
+    // 定义响应式变量
+    const centerDialogVisible = ref(false); // 控制编辑对话框的显示与隐藏
+    const ingredients = ref([]); // 存储从 API 获取的原料列表
+    let selectingIngredient = reactive({}); // 当前正在编辑的原料对象
+    const selectingUnit = ref('ml'); // 当前选择的单位，默认为毫升（ml）
+
+    const savedIngredients = ref([]); // 存储已保存的原料配置
+    const selectedIngredients = ref([]); // 存储已选中的原料名称
+    const CalculatedABV = ref(0); // 计算出的酒精浓度（ABV）
+
+    // 组件挂载时执行的逻辑
+    onMounted(async () => {
+        // 调用 API 获取原料列表，并更新 ingredients 的值
+        const ingredientsResponse = await listIngredients();
+        ingredients.value = ingredientsResponse.data.drinks;
+    });
+
+    // 编辑原料时的回调函数
+    const onIngredientEdit = (index) => {
+        // 将选中的原料数据复制到 selectingIngredient 中
+        Object.assign(selectingIngredient, savedIngredients.value[index]);
+        // 更新当前选择的单位
+        selectingUnit.value = savedIngredients.value[index].unit;
+        // 打开编辑对话框
+        centerDialogVisible.value = true;
+    };
+
+    // 创建一个新的原料对象
+    const createIngredient = (name = '', abv = 0, volume = 0, unit = 'ml') => ({ name, abv, volume, unit });
+
+    // 保存配置的回调函数
+    const saveConfiguration = () => {
+        // 查找当前编辑的原料是否已存在于 savedIngredients 中
+        const index = savedIngredients.value.findIndex(item => item.name === selectingIngredient.name);
+        if (index !== -1) {
+            // 如果存在，更新其单位
+            savedIngredients.value[index] = {
+                ...selectingIngredient,
+                unit: selectingUnit.value
+            };
+        } else {
+            // 如果不存在，将其添加到 savedIngredients 中
+            savedIngredients.value.push({ ...selectingIngredient, unit: selectingUnit.value });
+        }
+        // 关闭对话框
+        centerDialogVisible.value = false;
+        // 重置 selectingIngredient 和 selectingUnit
+        resetSelecting();
+    };
+
+    // 取消配置的回调函数
+    const cancelConfiguration = () => {
+        // 判断是否是添加操作（selectingIngredient 没有 name 或者 name 不在 savedIngredients 中）
+        const isAdding = !selectingIngredient.name || !savedIngredients.value.some(item => item.name === selectingIngredient.name);
+
+        // 如果是添加操作，移除最后一个选中的原料
+        if (isAdding) {
+            selectedIngredients.value.pop();
+        }
+
+        // 关闭对话框
+        centerDialogVisible.value = false;
+
+        // 重置 selectingIngredient 和 selectingUnit
+        resetSelecting();
+    };
+
+    // 根据 ABV 值返回对应的 CSS 类名
+    const getABVClass = (abv) => {
+        if (abv < 10) return 'text-success'; // 低酒精浓度，绿色
+        if (abv <= 20) return 'text-warning'; // 中等酒精浓度，黄色
+        return 'text-danger'; // 高酒精浓度，红色
+    };
+
+    // 计算酒精浓度（ABV）的函数
+    const ABVCalc = () => {
+        // 使用 reduce 计算总酒精体积和总体积
+        const { totalAlcoholVolume, totalVolume } = savedIngredients.value.reduce((acc, ingredient) => {
+            // 将体积统一转换为毫升（ml）
+            let volumeInMl = ingredient.volume;
+            if (ingredient.unit === 'oz') {
+                // 1 oz = 29.5735 ml
+                volumeInMl = ingredient.volume * 29.5735;
+            }
+
+            // 计算酒精体积
+            const alcoholVolume = (ingredient.abv * volumeInMl) / 100;
+            acc.totalAlcoholVolume += alcoholVolume;
+            acc.totalVolume += volumeInMl;
+            return acc;
+        }, { totalAlcoholVolume: 0, totalVolume: 0 });
+
+        // 计算并更新 ABV 值
+        CalculatedABV.value = totalVolume === 0 ? 0 : parseInt(((totalAlcoholVolume / totalVolume) * 100));
+        return CalculatedABV.value;
+    };
+
+    // 当选中原料发生变化时的回调函数
+    const onTagChange = () => {
+        // 将最后一个选中的原料名称赋值给 selectingIngredient
+        selectingIngredient = createIngredient(selectedIngredients.value[selectedIngredients.value.length - 1]);
+        // 更新当前选择的单位
+        selectingUnit.value = selectingIngredient.unit;
+        // 打开编辑对话框
+        centerDialogVisible.value = true;
+    };
+
+    // 移除选中的原料标签
+    const removeTag = () => {
+        centerDialogVisible.value = false; // 关闭对话框
+        // 过滤掉未选中的原料
+        const selectedNames = new Set(selectedIngredients.value);
+        savedIngredients.value = savedIngredients.value.filter(saved => selectedNames.has(saved.name));
+    };
+
+    // 清空所有选中的原料标签
+    const clearTag = () => {
+        centerDialogVisible.value = false; // 关闭对话框
+        savedIngredients.value = []; // 清空已保存的原料
+    };
+
+    // 重置 selectingIngredient 和 selectingUnit
+    const resetSelecting = () => {
+        selectingIngredient.value = [];
+        selectingUnit.value = "ml";
+    };
+
+    // 监听 savedIngredients 的变化，自动计算 ABV
+    watch(savedIngredients, () => {
+        ABVCalc();
+    }, { deep: true }); // 深度监听，确保对象内部属性的变化也能触发
+
+</script>
+
+
+<style scoped lang="css">
+.card {
+    background: rgb(236, 236, 236);
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Smooch+Sans:wght@100..900&display=swap');
+
+.bona-nova-sc-regular {
+    font-family: "Bona Nova SC", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    font-size: large;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* 整个视口高度，包含头部*/
+}
+
+
+
+</style>
