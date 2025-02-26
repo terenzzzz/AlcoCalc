@@ -1,13 +1,17 @@
 
 <template>
     <div class=" container" id="container">
+        <div class="position-relative">
+            <img src="@/assets/bar_hero.png" class="img-fluid object-fit-cover w-100" style="height:30vh; filter: blur(5px)">
+            <h1 class="position-absolute text-center text-white" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                鸡尾酒酒精浓度计算器
+            </h1>
+        </div>
 
-
-        <h1 class="text-center fs-1 fw-bold mt-5" >鸡尾酒酒精浓度计算器</h1>
         <el-divider></el-divider>
 
         <div id="result" class="text-center my-5" :class="getABVClass(CalculatedABV)">
-            <p><strong class="fs-1">{{CalculatedABV}}%</strong> in <strong class="fs-1">{{CalculatedVolume}}ml</strong> liquid</p>
+            <p><strong class="fs-1">{{CalculatedABV}}%</strong> 在 <strong class="fs-1">{{CalculatedVolume}}ml</strong> 的酒液中</p>
         </div>
 
         <!--            Select Box-->
@@ -34,7 +38,7 @@
             </div>
 
         <div class="row mt-5">
-            <div class="col-4" v-for="(ingredient, index) in savedIngredients" :key="index">
+            <div class="col-4 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
                 <div @click="onIngredientEdit(index)" class="d-flex" style="cursor: pointer;">
                     <div class="d-flex justify-content-center">
                         <img
@@ -254,22 +258,8 @@
 
 
 <style scoped lang="css">
-.card {
-    background: rgb(236, 236, 236);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Smooch+Sans:wght@100..900&display=swap');
-
-.bona-nova-sc-regular {
-    font-family: "Bona Nova SC", serif;
-    font-weight: 400;
-    font-style: normal;
-}
-
 * {
     box-sizing: border-box;
-    font-size: large;
 }
 
 #container {
