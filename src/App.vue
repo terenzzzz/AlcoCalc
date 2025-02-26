@@ -61,7 +61,7 @@
     >
         <el-divider></el-divider>
         <p>你选择的材料是：<strong>{{ selectingIngredient.name }}</strong></p>
-        <div class="row">
+        <div class="row" >
             <div class="col-4">
                 <label for="abv" class="form-label">酒精度数（%）</label>
                 <input type="number" class="form-control" id="abv" v-model="selectingIngredient.abv" />
@@ -108,6 +108,7 @@
     // 定义单位列表，包含毫升（ml）和盎司（oz）
     const unitList = [
         { value: 'ml', label: 'ml' },
+        { value: 'cl', label: 'cl' },
         { value: 'oz', label: 'oz' }
     ];
 
@@ -195,6 +196,10 @@
             if (ingredient.unit === 'oz') {
                 // 1 oz = 29.5735 ml
                 volumeInMl = ingredient.volume * 29.5735;
+            }
+            if (ingredient.unit === 'cl') {
+                // 1 cl = 10 ml
+                volumeInMl = ingredient.volume * 10;
             }
 
             // 计算酒精体积
