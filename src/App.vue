@@ -6,7 +6,9 @@
         <h1 class="text-center fs-1 fw-bold mt-5" >鸡尾酒酒精浓度计算器</h1>
         <el-divider></el-divider>
 
-        <div id="result" class="text-center fs-1 fw-bold" :class="getABVClass(CalculatedABV)"> {{CalculatedABV}}% </div>
+        <div id="result" class="text-center my-5" :class="getABVClass(CalculatedABV)">
+            <p><strong class="fs-1">{{CalculatedABV}}%</strong> in <strong class="fs-1">{{CalculatedVolume}}ml</strong> liquid</p>
+        </div>
 
         <!--            Select Box-->
         <div class="row mt-3 ">
@@ -118,6 +120,7 @@
     const savedIngredients = ref([]); // 存储已保存的原料配置
     const selectedIngredients = ref([]); // 存储已选中的原料名称
     const CalculatedABV = ref(0); // 计算出的酒精浓度（ABV）
+    const CalculatedVolume = ref(0); // 计算出的酒精浓度（ABV）
 
     // 组件挂载时执行的逻辑
     onMounted(async () => {
@@ -203,6 +206,7 @@
 
         // 计算并更新 ABV 值
         CalculatedABV.value = totalVolume === 0 ? 0 : parseInt(((totalAlcoholVolume / totalVolume) * 100));
+        CalculatedVolume.value = totalVolume;
         return CalculatedABV.value;
     };
 
