@@ -1,6 +1,6 @@
 
 <template>
-    <div class="bona-nova-sc-regular container" id="container">
+    <div class=" container" id="container">
 
 
         <h1 class="text-center fs-1 fw-bold mt-5" >鸡尾酒酒精浓度计算器</h1>
@@ -33,7 +33,7 @@
 
         <div class="row mt-5">
             <div class="col-4" v-for="(ingredient, index) in savedIngredients" :key="index">
-                <div @click="onIngredientEdit(index)" class="d-flex">
+                <div @click="onIngredientEdit(index)" class="d-flex" style="cursor: pointer;">
                     <div class="d-flex justify-content-center">
                         <img
                             :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`"
