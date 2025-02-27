@@ -21,5 +21,8 @@ export default {
 
         dataError: 'Data Error',
         notLessThan0: 'ABV and volume cannot be less than 0',
+
+
+        reference: 'Common liquid abv reference',
     }
 }

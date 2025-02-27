@@ -51,18 +51,13 @@
             <div class="col-4 col-xl-3 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
                 <div @click="onIngredientEdit(index)" class="d-flex" style="cursor: pointer;">
                     <div class="d-flex justify-content-center">
-                        <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`" class="img-fluid">
+                        <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`" class="img-fluid" lazy>
                             <template #error>
                                 <div class="image-slot">
                                     <img :src="`https://placehold.co/100X100/transparent/000000?text=${ingredient.name}`" class="img-fluid" style="width: 100px; height: 100px;"/>
                                 </div>
                             </template>
                         </el-image>
-
-<!--                        <img-->
-<!--                            :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`"-->
-<!--                            class="img-fluid"-->
-<!--                        />-->
                     </div>
                     <div class="d-flex flex-column justify-content-center">
                         <p class="m-0">{{ ingredient.name }}</p>
@@ -70,6 +65,30 @@
                         <p class="m-0">{{ ingredient.volume }} {{ ingredient.unit }}</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+
+        <el-divider></el-divider>
+        <div class="row mt-5">
+            <h3>{{ $t('message.reference') }}</h3>
+            <div class="col-4 col-xl-3" v-for="(r, index) in abvReference" :key="index">
+                <div class="d-flex my-2  border py-2 px-3 shadow-sm">
+                    <div class="d-flex justify-content-center">
+                        <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(r.name)}-small.png`" class="img-fluid" lazy>
+                            <template #error>
+                                <div class="image-slot">
+                                    <img :src="`https://placehold.co/100X100/transparent/000000?text=${r.name}`" class="img-fluid" style="width: 100px; height: 100px;"/>
+                                </div>
+                            </template>
+                        </el-image>
+                    </div>
+                    <div class="d-flex flex-column justify-content-center text-center w-100">
+                        <p class="m-0">{{ r.name }}</p>
+                        <p class="m-0" :class="getABVClass(r.abv)">{{ r.abv }} %</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -128,11 +147,14 @@
     // 导入 API 函数，用于获取鸡尾酒原料列表
     import { listIngredients } from "@/api/cocktails.js";
     import {ElNotification} from "element-plus";
+    import {abvReference} from  "./enum/AbvReference.js"
 
     import enFlag from '@/assets/country/en.png';
     import zhFlag from '@/assets/country/cn.png';
     import { useI18n } from 'vue-i18n';
     const { t, locale } = useI18n();
+
+
 
     // 定义单位列表，包含毫升（ml）和盎司（oz）
     const unitList = [
