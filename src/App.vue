@@ -2,26 +2,35 @@
 <template>
     <div class="position-relative">
         <img src="@/assets/bar_hero.png" class="img-fluid object-fit-cover w-100" style="height:30vh; filter: blur(5px)">
-        <h1 class="position-absolute text-center text-white" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
-            鸡尾酒酒精浓度计算器
-        </h1>
+        <div class="position-absolute text-center text-white" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <h1>{{ $t('message.title') }}</h1>
+            <p>{{ $t('message.findMore') }} <a href="https://terenzzzz.cn/whatToMix/" target="_blank">WhatToMix</a></p>
+            <a href="javascript:void(0);" class="item" @click="toggleLanguage">
+                <img :src="currentFlag"  style="width: 32px"/>
+            </a>
+        </div>
+
+        <div class="position-absolute text-center text-white" style="bottom: 0; right: 0;">
+            <p class="me-4">{{ $t('message.author') }}： <a href="https://terenzzzz.cn" target="_blank">Terenz</a></p>
+        </div>
+
     </div>
     <div class=" container" id="container">
 
         <el-divider></el-divider>
 
         <div id="result" class="text-center my-5" :class="getABVClass(CalculatedABV)">
-            <p><strong class="fs-1">{{CalculatedABV}}%</strong> 在 <strong class="fs-1">{{CalculatedVolume}}ml</strong> 的酒液中</p>
+            <p><strong class="fs-1">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-1">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
         </div>
 
         <!--            Select Box-->
         <div class="row mt-3 ">
-                <strong>所使用的材料</strong>
+                <strong>{{ $t('message.ingredientsUsed') }}</strong>
                 <el-select
                     v-model="selectedIngredients"
                     multiple
                     filterable
-                    placeholder="选择所使用的材料"
+                    :placeholder="$t('message.ingredientsUsedPlaceHolder')"
                     size="large"
                     clearable
                     @change="onTagChange"
@@ -58,24 +67,24 @@
     </div>
     <el-dialog
         v-model="centerDialogVisible"
-        title="进一步配置"
+        :title="$t('message.configuration')"
         width="800"
         align-center
         :show-close="false"
     >
         <el-divider></el-divider>
-        <p>你选择的材料是：<strong>{{ selectingIngredient.name }}</strong></p>
+        <p>{{ $t('message.choosingIngredient') }}：<strong>{{ selectingIngredient.name }}</strong></p>
         <div class="row" >
             <div class="col-4">
-                <label for="abv" class="form-label">酒精度数（%）</label>
+                <label for="abv" class="form-label">{{ $t('message.abv') }}</label>
                 <input type="number" min="0" class="form-control" id="abv" v-model="selectingIngredient.abv" />
             </div>
             <div class="col-4">
-                <label for="volume" class="form-label">体积</label>
+                <label for="volume" class="form-label">{{ $t('message.volume') }}</label>
                 <input type="number" min="0" class="form-control" id="volume" v-model="selectingIngredient.volume" />
             </div>
             <div class="col-4">
-                <label for="unit" class="form-label">体积单位</label>
+                <label for="unit" class="form-label">{{ $t('message.unit') }}</label>
                 <el-select
                     v-model="selectingUnit"
                 >
@@ -93,10 +102,10 @@
         <el-divider></el-divider>
         <template #footer>
             <div class="dialog-footer">
-                <el-button @click="cancelConfiguration">取消</el-button>
-                <el-button @click="removeConfiguration" v-if="!isAdding" type="danger">移除</el-button>
+                <el-button @click="cancelConfiguration">{{ $t('message.cancel') }}</el-button>
+                <el-button @click="removeConfiguration" v-if="!isAdding" type="danger">{{ $t('message.remove') }}</el-button>
                 <el-button type="primary" @click="saveConfiguration">
-                    确认
+                    {{ $t('message.confirm') }}
                 </el-button>
             </div>
         </template>
@@ -111,12 +120,40 @@
     import { listIngredients } from "@/api/cocktails.js";
     import {ElNotification} from "element-plus";
 
+    import enFlag from '@/assets/country/en.png';
+    import zhFlag from '@/assets/country/cn.png';
+    import { useI18n } from 'vue-i18n';
+    const { t, locale } = useI18n();
+
     // 定义单位列表，包含毫升（ml）和盎司（oz）
     const unitList = [
         { value: 'ml', label: 'ml' },
         { value: 'cl', label: 'cl' },
         { value: 'oz', label: 'oz' }
     ];
+
+    const currentLanguage = ref(locale.value);
+
+    const flags= {
+        en: enFlag,
+        zh: zhFlag,
+    }
+
+    // 计算属性：动态返回当前语言的国旗
+    const currentFlag = computed(() => flags[currentLanguage.value]);
+
+    // 切换语言的方法
+    function toggleLanguage() {
+        if (currentLanguage.value === 'zh') {
+            currentLanguage.value = 'en';
+            locale.value = 'en';
+        } else {
+            currentLanguage.value = 'zh';
+            locale.value = 'zh';
+        }
+    }
+
+
 
     // 定义响应式变量
     const centerDialogVisible = ref(false); // 控制编辑对话框的显示与隐藏
@@ -281,8 +318,8 @@
 
     const validationNotification = () => {
         ElNotification({
-            title: '数据错误',
-            message: '酒精浓度和体积不能小于0',
+            title: `${t('message.dataError')}`,
+            message: `${t('message.notLessThan0')}`,
             type: 'error',
         })
     }
@@ -301,6 +338,11 @@
     min-height: 100vh; /* 整个视口高度，包含头部*/
 }
 
+a {
+    text-decoration: underline;
+    color: white;
+    font-weight: bold;
+}
 
 
 </style>
