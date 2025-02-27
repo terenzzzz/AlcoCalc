@@ -33,6 +33,7 @@
                     :placeholder="$t('message.ingredientsUsedPlaceHolder')"
                     size="large"
                     clearable
+                    allow-create
                     @change="onTagChange"
                     @remove-tag="removeTag"
                     @clear="clearTag"
@@ -47,13 +48,21 @@
             </div>
 
         <div class="row mt-5">
-            <div class="col-4 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
+            <div class="col-4 col-xl-3 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
                 <div @click="onIngredientEdit(index)" class="d-flex" style="cursor: pointer;">
                     <div class="d-flex justify-content-center">
-                        <img
-                            :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`"
-                            class="img-fluid"
-                        />
+                        <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`" class="img-fluid">
+                            <template #error>
+                                <div class="image-slot">
+                                    <img :src="`https://placehold.co/100X100/transparent/000000?text=${ingredient.name}`" class="img-fluid" style="width: 100px; height: 100px;"/>
+                                </div>
+                            </template>
+                        </el-image>
+
+<!--                        <img-->
+<!--                            :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`"-->
+<!--                            class="img-fluid"-->
+<!--                        />-->
                     </div>
                     <div class="d-flex flex-column justify-content-center">
                         <p class="m-0">{{ ingredient.name }}</p>
