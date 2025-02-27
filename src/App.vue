@@ -19,7 +19,7 @@
 
         <el-divider></el-divider>
 
-        <div id="result" class="text-center my-5" :class="getABVClass(CalculatedABV)">
+        <div id="result" class="text-center my-2 my-md-5" :class="getABVClass(CalculatedABV)">
             <p><strong class="fs-1">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-1">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
         </div>
 
@@ -48,7 +48,7 @@
             </div>
 
         <div class="row mt-5">
-            <div class="col-4 col-xl-3 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
+            <div class="col-6 col-md-4 col-xl-3 my-2" v-for="(ingredient, index) in savedIngredients" :key="index">
                 <div @click="onIngredientEdit(index)" class="d-flex" style="cursor: pointer;">
                     <div class="d-flex justify-content-center">
                         <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(ingredient.name)}-small.png`" class="img-fluid" lazy>
@@ -72,7 +72,7 @@
         <el-divider></el-divider>
         <div class="row mt-5">
             <h3>{{ $t('message.reference') }}</h3>
-            <div class="col-4 col-xl-3" v-for="(r, index) in abvReference" :key="index">
+            <div class="col-6 col-md-4 col-xl-3" v-for="(r, index) in abvReference" :key="index">
                 <div class="d-flex my-2  border py-2 px-3 shadow-sm">
                     <div class="d-flex justify-content-center">
                         <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${encodeURIComponent(r.name)}-small.png`" class="img-fluid" lazy>
