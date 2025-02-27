@@ -1,7 +1,7 @@
 // src/locales/en.js
 export default {
     message: {
-        title: 'Cocktail ABV Calculator',
+        title: '鸡尾酒酒精度数计算器',
         findMore: '如需查找鸡尾酒配方，请移步至',
         author: '作者',
         ingredientsUsed: '所使用的材料',
