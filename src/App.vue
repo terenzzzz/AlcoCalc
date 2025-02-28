@@ -314,7 +314,7 @@ const { t, locale } = useI18n();
     function downloadResult() {
         const link = document.createElement('a');
         link.href = screenshotImageUrl.value;
-        link.download = 'screenshot.png'; // 设置下载文件名
+        link.download = 'AlcoCalc.png'; // 设置下载文件名
         document.body.appendChild(link); // 将链接添加到 DOM 中
         link.click(); // 触发下载
         document.body.removeChild(link); // 移除链接

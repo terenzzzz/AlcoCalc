@@ -14,4 +14,7 @@ export default defineConfig({
   build: {
     assetsInlineLimit: 0, // 让所有图片都作为独立文件
   },
+  server: {				// ← ← ← ← ← ←
+    host: '0.0.0.0'	// ← 新增内容 ←
+  }
 })
