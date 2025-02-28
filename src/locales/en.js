@@ -24,5 +24,11 @@ export default {
 
 
         reference: 'Common liquid abv reference',
+
+        result: 'ABV Calculated Result',
+        share: 'Share',
+        saveScreenshot: 'Save Image',
+        total: 'Total'
+
     }
 }

@@ -22,6 +22,11 @@ export default {
         dataError: '数据错误',
         notLessThan0: '酒精浓度和体积不能小于0',
 
-        reference: '常见基酒酒精度参考表'
+        reference: '常见基酒酒精度参考表',
+
+        result: '酒精度数计算结果',
+        share: '分享',
+        saveScreenshot: '保存图片',
+        total: '总计'
     }
 }
