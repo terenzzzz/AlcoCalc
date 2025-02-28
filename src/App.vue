@@ -329,11 +329,11 @@ const { t, locale } = useI18n();
                 // 检查浏览器是否支持 Web Share API
                 if (navigator.share) {
                     // 创建一个文件对象
-                    const file = new File([blob], 'screenshot.png', { type: 'image/png' });
+                    const file = new File([blob], 'AlcoCalc.png', { type: 'image/png' });
 
                     // 使用 Web Share API 分享文件
                     navigator.share({
-                        title: 'Screenshot',
+                        title: 'AlcoCalc',
                         files: [file],
                     })
                         .then(() => console.log('分享成功'))
