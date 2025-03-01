@@ -23,4 +23,4 @@
 - **多语言支持**：提供英文和中文界面，满足不同语言用户的需求，提升用户体验。
 
 ### 截图
-![截图](./screenshots/promo.png)
+![截图](./screenshots/result.png)
