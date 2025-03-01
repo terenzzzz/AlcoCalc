@@ -14,7 +14,7 @@
 - **自动计算**：根据用户输入的酒精成分和非酒精成分的比例，自动计算鸡尾酒的总酒精浓度（ABV）。
 - **结果显示**：显示详细的计算结果，包括每种酒的酒精含量、鸡尾酒的总酒精浓度以及总液体体积。
 
-### 3. **保存和分享配方** -- TODO
+### 3. **保存和分享配方** 
 
 - **保存功能**：用户可以保存自己创建的鸡尾酒配方，方便日后查看或修改。
 - **分享功能**：提供分享选项，用户可以将配方或计算结果分享给朋友或发布到社交媒体。
@@ -22,5 +22,14 @@
 ### 4. **国际化** 
 - **多语言支持**：提供英文和中文界面，满足不同语言用户的需求，提升用户体验。
 
+### **5.** 常见基酒参考表
+- 系统提供常见的基酒材料的酒精度数供参考。
+
 ### 截图
-![截图](./screenshots/result.png)
+![截图](./screenshots/promo.png)
+![截图](./screenshots/dashboard_matting.png)
+![截图](./screenshots/config_matting.png)
+![截图](./screenshots/recipe_matting.png)
+![截图](./screenshots/share_matting.png)
+![截图](./screenshots/webShare_matting.png)
+![截图](./screenshots/shared.png)
