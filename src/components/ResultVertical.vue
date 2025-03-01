@@ -3,6 +3,8 @@
     <div class="card p-3 mt-3 rounded-4 shadow-sm h-100">
         <div class="d-flex flex-column justify-content-between h-100">
             <div class="top">
+                <p class="text-end m-0"><i class="bi-x-lg" v-if="closable" @click="handleClose($event)" style="cursor: pointer"></i></p>
+
                 <h5 class="text-center fw-bold">{{ $t('message.result') }}</h5>
                 <div class="row mt-3" v-for="(ingredient, index) in savedIngredients" :key="index">
                     <div class="d-flex justify-content-between" >
@@ -57,7 +59,17 @@ const props = defineProps({
     isWaterMark: {
         type: Boolean,
         default:true
-    }
+    },
+    closable: {
+        type: Boolean,
+        default: true
+    },
+    closeHandler: {
+        type: Function,
+        default: () => {
+            console.log('close')
+        },
+    },
 });
 
 const calculatedABV = ref(0); // 计算出的酒精浓度（ABV）
@@ -68,6 +80,11 @@ onMounted(()=>{
     getABVClass()
     ABVCalc()
 })
+
+function handleClose(event) {
+    event.stopPropagation(); // 阻止事件冒泡
+    props.closeHandler(); // 调用父组件传递的方法
+}
 
 // 根据 ABV 值返回对应的 CSS 类名
 const getABVClass = (abv) => {

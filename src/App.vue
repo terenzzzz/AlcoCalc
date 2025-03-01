@@ -22,7 +22,7 @@
         <div id="result" class="text-center my-2 my-md-5" >
             <p :class="getABVClass(CalculatedABV)"><strong class="fs-1">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-1">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
             <el-button type="primary" @click="shareHandler" v-if="savedIngredients.length>0" circle ><i class="bi bi-share "/></el-button>
-            <el-button type="primary" @click="saveInLocal" v-if="savedIngredients.length>0" circle ><i class="bi bi-cloud-download"/></el-button>
+            <el-button type="primary" @click="saveReceipt" v-if="savedIngredients.length>0" circle ><i class="bi bi-cloud-download"/></el-button>
         </div>
 
         <!--            Select Box-->
@@ -77,10 +77,28 @@
 
 <!--        保存的酒单-->
         <div class="row h-100" v-if="receiptsFromLocal.length>0">
-            <h3>{{ $t('message.savedReceipt') }}</h3>
-            <div class="col-12 col-sm-6 col-md-4 col-xl-3" v-for="(receipt, index) in receiptsFromLocal" :key="index" @click="selectReceipt(receipt)">
-                <ResultVertical :saved-ingredients="receipt" :is-water-mark="false"/>
+            <div class="d-flex align-items-center">
+                <h3 class="me-2">{{ $t('message.savedReceipt') }}</h3>
+                <el-button type="primary" @click="clearReceipt" size="small" >{{ $t('message.clear') }}</el-button>
             </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3" v-for="(receipt, index) in paginatedReceipts" :key="index" @click="selectReceipt(receipt)">
+                <ResultVertical :saved-ingredients="receipt" :is-water-mark="false" :closable="true" :close-handler="() => deleteReceipt(index)" style="cursor: pointer;"/>
+            </div>
+
+            <!-- 分页组件 -->
+            <div class="mt-5 d-flex justify-content-center">
+                <el-pagination
+                    background
+                    layout="prev, pager, next"
+                    :total="receiptsFromLocal.length"
+                    :page-size="pageSize"
+                    :current-page="currentPage"
+                    @current-change="handlePageChange"
+
+                />
+            </div>
+
 
         </div>
 
@@ -164,7 +182,7 @@
         align-center
     >
         <div id="screenshot" ref="screenshot">
-            <ResultVertical :calculated-volume="CalculatedVolume" :calculated-a-b-v="CalculatedABV" :abv-class="getABVClass(CalculatedABV)" :saved-ingredients="savedIngredients" />
+            <ResultVertical :calculated-volume="CalculatedVolume" :calculated-a-b-v="CalculatedABV" :abv-class="getABVClass(CalculatedABV)" :saved-ingredients="savedIngredients" :closable="false"/>
         </div>
         <template #footer>
             <div class="dialog-footer d-flex justify-content-end align-items-center">
@@ -173,7 +191,6 @@
                     <i class="bi bi-share me-2"></i>{{ $t('message.share') }}
                 </el-button>
             </div>
-
         </template>
     </el-dialog>
 
@@ -181,7 +198,7 @@
 
 <script setup>
 // 导入 Vue 3 的 Composition API 和相关工具函数
-import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 // 导入 API 函数，用于获取鸡尾酒原料列表
 import {listIngredients} from "@/api/cocktails.js";
 import {ElNotification} from "element-plus";
@@ -225,6 +242,10 @@ const { t, locale } = useI18n();
         }
     }
 
+    // 分页状态
+    const currentPage = ref(1); // 当前页码
+    const pageSize = ref(calculatePageSize()); // 每页显示的项目数
+
 
     // 定义响应式变量
     const configDialogVisible = ref(false); // 控制编辑对话框的显示与隐藏
@@ -245,20 +266,73 @@ const { t, locale } = useI18n();
 
     let isAdding = ref(false);
 
-    function saveInLocal(){
+    // 计算当前页的数据
+    const paginatedReceipts = computed(() => {
+        const start = (currentPage.value - 1) * pageSize.value;
+        const end = start + pageSize.value;
+        return receiptsFromLocal.value.slice(start, end);
+    });
+
+    // 处理页码变化
+    function handlePageChange(page) {
+        currentPage.value = page;
+    }
+
+    // 根据窗口宽度计算每页显示的项目数
+    function calculatePageSize() {
+        const width = window.innerWidth; // 使用 innerWidth
+        if (width >= 1400) return 4; // xxl: 4 列
+        if (width >= 1200) return 4; // xl: 4 列
+        if (width >= 768) return 3; // md: 3 列
+        if (width >= 576) return 2; // sm: 2 列
+        return 1; // xs: 1 列
+    }
+
+    // 监听窗口宽度变化
+    function handleResize() {
+        pageSize.value = calculatePageSize();
+    }
+
+
+    // 组件卸载时移除监听器
+    onUnmounted(() => {
+        window.removeEventListener('resize', handleResize);
+    });
+
+    function saveReceipt(){
         receiptsFromLocal.value.push(savedIngredients.value)
+        console.log(receiptsFromLocal.value)
 
         // 保存到 localStorage
         localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+        fetchReceiptsFromLocal()
     }
 
     function selectReceipt(receipt) {
-        console.log(receipt)
         selectedIngredients.value = receipt.map(item => item?.name);
         savedIngredients.value = receipt;
         ABVCalc()
     }
 
+    function deleteReceipt(index) {
+        receiptsFromLocal.value.splice(index, 1);
+        localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+    }
+
+    function clearReceipt(){
+        localStorage.setItem('savedIngredients', JSON.stringify([]));
+        fetchReceiptsFromLocal()
+    }
+
+    function fetchReceiptsFromLocal(){
+        if (localStorage.getItem('savedIngredients')) {
+            receiptsFromLocal.value = JSON.parse(localStorage.getItem('savedIngredients')).reverse();
+        } else {
+            console.log('Initializing empty array...');
+            receiptsFromLocal.value = [];
+            localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+        }
+    }
 
     function waitForImages(container) {
         const images = container.querySelectorAll('img');
@@ -351,13 +425,8 @@ const { t, locale } = useI18n();
         const ingredientsResponse = await listIngredients();
         ingredients.value = ingredientsResponse.data.drinks;
 
-        if (localStorage.getItem('savedIngredients')) {
-            receiptsFromLocal.value = JSON.parse(localStorage.getItem('savedIngredients')).reverse();
-        } else {
-            console.log('Initializing empty array...');
-            receiptsFromLocal.value = [];
-            localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
-        }
+        fetchReceiptsFromLocal()
+        window.addEventListener('resize', handleResize);
     });
 
     // 编辑原料时的回调函数
@@ -487,6 +556,7 @@ const { t, locale } = useI18n();
     const clearTag = () => {
         configDialogVisible.value = false; // 关闭对话框
         savedIngredients.value = []; // 清空已保存的原料
+        selectedIngredients .value = []
     };
 
     // 重置 selectingIngredient 和 selectingUnit
