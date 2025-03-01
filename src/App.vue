@@ -27,14 +27,16 @@
 
         <!--            Select Box-->
         <div class="row mt-3 ">
-                <strong>{{ $t('message.ingredientsUsed') }}</strong>
+                <div class="mb-2">
+                    <strong class="me-2">{{ $t('message.ingredientsUsed') }}</strong>
+                    <el-button type="primary" @click="clearTag" size="small" >{{ $t('message.clear') }}</el-button>
+                </div>
                 <el-select
                     v-model="selectedIngredients"
                     multiple
                     filterable
                     :placeholder="$t('message.ingredientsUsedPlaceHolder')"
                     size="large"
-                    clearable
                     allow-create
                     @change="onTagChange"
                     @remove-tag="removeTag"
@@ -71,12 +73,12 @@
         </div>
 
 
-        <el-divider></el-divider>
+        <el-divider v-if="receiptsFromLocal.length>0"></el-divider>
 
 <!--        保存的酒单-->
-        <div class="row" v-if="receiptsFromLocal.length>0">
+        <div class="row h-100" v-if="receiptsFromLocal.length>0">
             <h3>{{ $t('message.savedReceipt') }}</h3>
-            <div class="col-4" v-for="(receipt, index) in receiptsFromLocal" :key="index">
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3" v-for="(receipt, index) in receiptsFromLocal" :key="index" @click="selectReceipt(receipt)">
                 <ResultVertical :saved-ingredients="receipt" :is-water-mark="false"/>
             </div>
 
@@ -248,6 +250,13 @@ const { t, locale } = useI18n();
 
         // 保存到 localStorage
         localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+    }
+
+    function selectReceipt(receipt) {
+        console.log(receipt)
+        selectedIngredients.value = receipt.map(item => item?.name);
+        savedIngredients.value = receipt;
+        ABVCalc()
     }
 
 

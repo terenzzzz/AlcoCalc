@@ -29,6 +29,7 @@ export default {
         saveScreenshot: '保存图片',
         total: '总计',
 
-        savedReceipt: '保存的酒单'
+        savedReceipt: '保存的酒单',
+        clear:"清除"
     }
 }
