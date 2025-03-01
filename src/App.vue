@@ -72,6 +72,18 @@
 
 
         <el-divider></el-divider>
+
+<!--        保存的酒单-->
+        <div class="row" v-if="receiptsFromLocal.length>0">
+            <h3>{{ $t('message.savedReceipt') }}</h3>
+            <div class="col-4" v-for="(receipt, index) in receiptsFromLocal" :key="index">
+                <ResultVertical :saved-ingredients="receipt" :is-water-mark="false"/>
+            </div>
+
+        </div>
+
+        <el-divider></el-divider>
+<!--        基酒酒精度数参考表-->
         <div class="row mt-5">
             <h3>{{ $t('message.reference') }}</h3>
             <div class="col-6 col-md-4 col-xl-3" v-for="(r, index) in abvReference" :key="index">
@@ -146,7 +158,7 @@
 <!--    分享截屏模态框-->
     <el-dialog
         v-model="screenshotDialogVisible"
-        width="800"
+        width="600"
         align-center
     >
         <div id="screenshot" ref="screenshot">
@@ -166,20 +178,20 @@
 </template>
 
 <script setup>
-    // 导入 Vue 3 的 Composition API 和相关工具函数
-    import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
-    // 导入 API 函数，用于获取鸡尾酒原料列表
-    import {listIngredients} from "@/api/cocktails.js";
-    import {ElNotification} from "element-plus";
-    import {abvReference} from "./enum/AbvReference.js"
+// 导入 Vue 3 的 Composition API 和相关工具函数
+import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+// 导入 API 函数，用于获取鸡尾酒原料列表
+import {listIngredients} from "@/api/cocktails.js";
+import {ElNotification} from "element-plus";
+import {abvReference} from "./enum/AbvReference.js"
 
-    import enFlag from '@/assets/country/en.png';
-    import zhFlag from '@/assets/country/cn.png';
-    import {useI18n} from 'vue-i18n';
-    import html2canvas from "html2canvas";
-    import ResultVertical from "@/components/ResultVertical.vue";
+import enFlag from '@/assets/country/en.png';
+import zhFlag from '@/assets/country/cn.png';
+import {useI18n} from 'vue-i18n';
+import html2canvas from "html2canvas";
+import ResultVertical from "@/components/ResultVertical.vue";
 
-    const { t, locale } = useI18n();
+const { t, locale } = useI18n();
 
 
 
@@ -227,22 +239,15 @@
     const CalculatedABV = ref(0); // 计算出的酒精浓度（ABV）
     const CalculatedVolume = ref(0); // 计算出的酒精浓度（ABV）
 
+    const receiptsFromLocal = ref([]); // 计算出的酒精浓度（ABV）
+
     let isAdding = ref(false);
 
     function saveInLocal(){
-        // 将数组转换为 JSON 字符串
-        let saved = []
-
-        if(localStorage.getItem('savedIngredients')){
-            saved = JSON.parse(localStorage.getItem('savedIngredients'));
-        }
-
-        console.log(savedIngredients.value)
-
-        saved.push(savedIngredients.value)
+        receiptsFromLocal.value.push(savedIngredients.value)
 
         // 保存到 localStorage
-        localStorage.setItem('savedIngredients', JSON.stringify(saved));
+        localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
     }
 
 
@@ -336,6 +341,14 @@
         // 调用 API 获取原料列表，并更新 ingredients 的值
         const ingredientsResponse = await listIngredients();
         ingredients.value = ingredientsResponse.data.drinks;
+
+        if (localStorage.getItem('savedIngredients')) {
+            receiptsFromLocal.value = JSON.parse(localStorage.getItem('savedIngredients')).reverse();
+        } else {
+            console.log('Initializing empty array...');
+            receiptsFromLocal.value = [];
+            localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+        }
     });
 
     // 编辑原料时的回调函数

@@ -27,6 +27,8 @@ export default {
         result: '酒精度数计算结果',
         share: '分享',
         saveScreenshot: '保存图片',
-        total: '总计'
+        total: '总计',
+
+        savedReceipt: '保存的酒单'
     }
 }
