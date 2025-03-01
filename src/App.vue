@@ -21,7 +21,8 @@
 
         <div id="result" class="text-center my-2 my-md-5" >
             <p :class="getABVClass(CalculatedABV)"><strong class="fs-1">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-1">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
-            <el-button type="primary" @click="shareHandler" v-if="savedIngredients.length>0" circle ><i class="bi bi-share"/></el-button>
+            <el-button type="primary" @click="shareHandler" v-if="savedIngredients.length>0" circle ><i class="bi bi-share "/></el-button>
+            <el-button type="primary" @click="saveInLocal" v-if="savedIngredients.length>0" circle ><i class="bi bi-cloud-download"/></el-button>
         </div>
 
         <!--            Select Box-->
@@ -149,43 +150,7 @@
         align-center
     >
         <div id="screenshot" ref="screenshot">
-            <div class="card p-3 mt-3 rounded-4 shadow-sm">
-                <h3 class="text-center fw-bold">{{ $t('message.result') }}</h3>
-                <div class="row mt-3" v-for="(ingredient, index) in savedIngredients" :key="index">
-                    <div class="d-flex justify-content-between" >
-                        <div class="d-flex justify-content-center align-items-center">
-                            <el-image :src="`https://www.thecocktaildb.com/images/ingredients/${ingredient.name}-small.png`" class="img-fluid" style="width: 60px; height: 60px;">
-                                <template #error>
-                                    <div class="image-slot">
-                                        <img :src="`https://placehold.co/100X100/transparent/000000?text=${ingredient.name}`" class="img-fluid" style="width: 50px; height: 50px;"/>
-                                    </div>
-                                </template>
-                            </el-image>
-                            <div class="text-center ms-3">
-                                <h4 class="m-0">{{ ingredient.name }}</h4>
-                                <p class="m-0" :class="getABVClass(ingredient.abv)">{{ ingredient.abv.toFixed(2) }} %</p>
-                            </div>
-                        </div>
-                        <h4 class="d-flex align-items-center">{{ ingredient.volume }} {{ ingredient.unit }}</h4>
-                    </div>
-                    <el-divider v-if="index!==savedIngredients.length-1"></el-divider>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mt-5" >
-                    <h4>{{ $t('message.total') }}</h4>
-                    <p :class="getABVClass(CalculatedABV)" class="text-center"><strong class="fs-3">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-3">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
-                </div>
-
-                <el-divider></el-divider>
-                <div class="d-flex align-items-center justify-content-center align-items-center" >
-                    <img src="../public/icon.png"  class="p-0" style="width: 50px; height: 50px;"/>
-                    <div class="d-flex flex-column text-center ">
-                        <h4 class="m-0 ms-2 fw-bold">AlcoCalc</h4>
-                        <p>@terenzzz</p>
-                    </div>
-
-                </div>
-            </div>
+            <ResultVertical :calculated-volume="CalculatedVolume" :calculated-a-b-v="CalculatedABV" :abv-class="getABVClass(CalculatedABV)" :saved-ingredients="savedIngredients" />
         </div>
         <template #footer>
             <div class="dialog-footer d-flex justify-content-end align-items-center">
@@ -201,19 +166,20 @@
 </template>
 
 <script setup>
-// 导入 Vue 3 的 Composition API 和相关工具函数
-import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
-// 导入 API 函数，用于获取鸡尾酒原料列表
-import {listIngredients} from "@/api/cocktails.js";
-import {ElNotification} from "element-plus";
-import {abvReference} from "./enum/AbvReference.js"
+    // 导入 Vue 3 的 Composition API 和相关工具函数
+    import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+    // 导入 API 函数，用于获取鸡尾酒原料列表
+    import {listIngredients} from "@/api/cocktails.js";
+    import {ElNotification} from "element-plus";
+    import {abvReference} from "./enum/AbvReference.js"
 
-import enFlag from '@/assets/country/en.png';
-import zhFlag from '@/assets/country/cn.png';
-import {useI18n} from 'vue-i18n';
-import html2canvas from "html2canvas";
+    import enFlag from '@/assets/country/en.png';
+    import zhFlag from '@/assets/country/cn.png';
+    import {useI18n} from 'vue-i18n';
+    import html2canvas from "html2canvas";
+    import ResultVertical from "@/components/ResultVertical.vue";
 
-const { t, locale } = useI18n();
+    const { t, locale } = useI18n();
 
 
 
@@ -246,7 +212,6 @@ const { t, locale } = useI18n();
     }
 
 
-
     // 定义响应式变量
     const configDialogVisible = ref(false); // 控制编辑对话框的显示与隐藏
     const screenshotDialogVisible = ref(false); // 控制截图的显示与隐藏
@@ -263,6 +228,23 @@ const { t, locale } = useI18n();
     const CalculatedVolume = ref(0); // 计算出的酒精浓度（ABV）
 
     let isAdding = ref(false);
+
+    function saveInLocal(){
+        // 将数组转换为 JSON 字符串
+        let saved = []
+
+        if(localStorage.getItem('savedIngredients')){
+            saved = JSON.parse(localStorage.getItem('savedIngredients'));
+        }
+
+        console.log(savedIngredients.value)
+
+        saved.push(savedIngredients.value)
+
+        // 保存到 localStorage
+        localStorage.setItem('savedIngredients', JSON.stringify(saved));
+    }
+
 
     function waitForImages(container) {
         const images = container.querySelectorAll('img');
