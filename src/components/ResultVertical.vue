@@ -5,7 +5,7 @@
             <div class="top">
                 <p class="text-end m-0"><i class="bi-x-lg" v-if="closable" @click="handleClose($event)" style="cursor: pointer"></i></p>
 
-                <h5 class="text-center fw-bold">{{ $t('message.result') }}</h5>
+                <h5 class="text-center fw-bold" v-if="isResultTitle">{{ $t('message.result') }}</h5>
                 <div class="row mt-3" v-for="(ingredient, index) in savedIngredients" :key="index">
                     <div class="d-flex justify-content-between" >
                         <div class="d-flex justify-content-center align-items-center">
@@ -70,6 +70,10 @@ const props = defineProps({
             console.log('close')
         },
     },
+    isResultTitle: {
+        type: Boolean,
+        default:true
+    }
 });
 
 const calculatedABV = ref(0); // 计算出的酒精浓度（ABV）
@@ -117,7 +121,7 @@ const ABVCalc = () => {
 
     // 计算并更新 ABV 值
     calculatedABV.value = totalVolume === 0 ? 0 : parseInt(((totalAlcoholVolume / totalVolume) * 100));
-    calculatedVolume.value = totalVolume;
+    calculatedVolume.value = parseInt(totalVolume);
     return calculatedABV.value;
 };
 

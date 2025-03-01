@@ -28,7 +28,25 @@ export default {
         result: 'ABV Calculated Result',
         share: 'Share',
         saveScreenshot: 'Save Image',
-        total: 'Total'
+        total: 'Total',
+
+        savedRecipe: 'Saved Recipes',
+        clear:"Clear",
+
+
+        success:'Success',
+        err: 'Error',
+
+        configNotification:{
+            saved: 'Successfully Saved Config',
+            removed: 'Successfully Removed Ingredient',
+        },
+
+        recipeNotification:{
+            saved: 'Recipe is Saved in Local',
+            removed: 'Recipe is Removed from Local',
+            cleared: 'All Recipes are Cleared from Local',
+        }
 
     }
 }

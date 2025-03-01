@@ -22,7 +22,7 @@
         <div id="result" class="text-center my-2 my-md-5" >
             <p :class="getABVClass(CalculatedABV)"><strong class="fs-1">{{CalculatedABV}}%</strong> {{ $t('message.in') }} <strong class="fs-1">{{CalculatedVolume}}ml</strong> {{ $t('message.liquid') }}</p>
             <el-button type="primary" @click="shareHandler" v-if="savedIngredients.length>0" circle ><i class="bi bi-share "/></el-button>
-            <el-button type="primary" @click="saveReceipt" v-if="savedIngredients.length>0" circle ><i class="bi bi-cloud-download"/></el-button>
+            <el-button type="primary" @click="saveRecipe" v-if="savedIngredients.length>0" circle ><i class="bi bi-cloud-download"/></el-button>
         </div>
 
         <!--            Select Box-->
@@ -73,17 +73,17 @@
         </div>
 
 
-        <el-divider v-if="receiptsFromLocal.length>0"></el-divider>
+        <el-divider v-if="recipesFromLocal.length>0"></el-divider>
 
 <!--        保存的酒单-->
-        <div class="row h-100" v-if="receiptsFromLocal.length>0">
+        <div class="row h-100" v-if="recipesFromLocal.length>0">
             <div class="d-flex align-items-center">
-                <h3 class="me-2">{{ $t('message.savedReceipt') }}</h3>
-                <el-button type="primary" @click="clearReceipt" size="small" >{{ $t('message.clear') }}</el-button>
+                <h3 class="me-2">{{ $t('message.savedRecipe') }}</h3>
+                <el-button type="primary" @click="clearRecipe" size="small" >{{ $t('message.clear') }}</el-button>
             </div>
 
-            <div class="col-12 col-sm-6 col-md-4 col-xl-3" v-for="(receipt, index) in paginatedReceipts" :key="index" @click="selectReceipt(receipt)">
-                <ResultVertical :saved-ingredients="receipt" :is-water-mark="false" :closable="true" :close-handler="() => deleteReceipt(index)" style="cursor: pointer;"/>
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3" v-for="(recipe, index) in paginatedRecipes" :key="index" @click="selectRecipe(recipe)">
+                <ResultVertical :saved-ingredients="recipe" :is-water-mark="false" :closable="true" :is-result-title="false" :close-handler="() => deleteRecipe(index)" style="cursor: pointer;"/>
             </div>
 
             <!-- 分页组件 -->
@@ -91,7 +91,7 @@
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="receiptsFromLocal.length"
+                    :total="recipesFromLocal.length"
                     :page-size="pageSize"
                     :current-page="currentPage"
                     @current-change="handlePageChange"
@@ -262,15 +262,15 @@ const { t, locale } = useI18n();
     const CalculatedABV = ref(0); // 计算出的酒精浓度（ABV）
     const CalculatedVolume = ref(0); // 计算出的酒精浓度（ABV）
 
-    const receiptsFromLocal = ref([]); // 计算出的酒精浓度（ABV）
+    const recipesFromLocal = ref([]); // 计算出的酒精浓度（ABV）
 
     let isAdding = ref(false);
 
     // 计算当前页的数据
-    const paginatedReceipts = computed(() => {
+    const paginatedRecipes = computed(() => {
         const start = (currentPage.value - 1) * pageSize.value;
         const end = start + pageSize.value;
-        return receiptsFromLocal.value.slice(start, end);
+        return recipesFromLocal.value.slice(start, end);
     });
 
     // 处理页码变化
@@ -299,38 +299,40 @@ const { t, locale } = useI18n();
         window.removeEventListener('resize', handleResize);
     });
 
-    function saveReceipt(){
-        receiptsFromLocal.value.push(savedIngredients.value)
-        console.log(receiptsFromLocal.value)
+    function saveRecipe(){
+        recipesFromLocal.value.push(savedIngredients.value)
 
         // 保存到 localStorage
-        localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
-        fetchReceiptsFromLocal()
+        localStorage.setItem('savedIngredients', JSON.stringify(recipesFromLocal.value));
+        fetchRecipesFromLocal()
+        notificationFactory(`${t('message.success')}`,`${t('message.recipeNotification.saved')}`,'success')
     }
 
-    function selectReceipt(receipt) {
-        selectedIngredients.value = receipt.map(item => item?.name);
-        savedIngredients.value = receipt;
+    function selectRecipe(recipe) {
+        selectedIngredients.value = recipe.map(item => item?.name);
+        savedIngredients.value = recipe;
         ABVCalc()
     }
 
-    function deleteReceipt(index) {
-        receiptsFromLocal.value.splice(index, 1);
-        localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+    function deleteRecipe(index) {
+        recipesFromLocal.value.splice(index, 1);
+        localStorage.setItem('savedIngredients', JSON.stringify(recipesFromLocal.value));
+        notificationFactory(`${t('message.success')}`,`${t('message.recipeNotification.removed')}`,'success')
     }
 
-    function clearReceipt(){
+    function clearRecipe(){
         localStorage.setItem('savedIngredients', JSON.stringify([]));
-        fetchReceiptsFromLocal()
+        fetchRecipesFromLocal()
+        notificationFactory(`${t('message.success')}`,`${t('message.recipeNotification.cleared')}`,'success')
     }
 
-    function fetchReceiptsFromLocal(){
+    function fetchRecipesFromLocal(){
         if (localStorage.getItem('savedIngredients')) {
-            receiptsFromLocal.value = JSON.parse(localStorage.getItem('savedIngredients')).reverse();
+            recipesFromLocal.value = JSON.parse(localStorage.getItem('savedIngredients')).reverse();
         } else {
             console.log('Initializing empty array...');
-            receiptsFromLocal.value = [];
-            localStorage.setItem('savedIngredients', JSON.stringify(receiptsFromLocal.value));
+            recipesFromLocal.value = [];
+            localStorage.setItem('savedIngredients', JSON.stringify(recipesFromLocal.value));
         }
     }
 
@@ -425,7 +427,7 @@ const { t, locale } = useI18n();
         const ingredientsResponse = await listIngredients();
         ingredients.value = ingredientsResponse.data.drinks;
 
-        fetchReceiptsFromLocal()
+        fetchRecipesFromLocal()
         window.addEventListener('resize', handleResize);
     });
 
@@ -447,7 +449,7 @@ const { t, locale } = useI18n();
     const saveConfiguration = () => {
         // 表单验证
         if(Number(selectingIngredient.abv) < 0 || Number(selectingIngredient.volume) < 0){
-            validationNotification()
+            notificationFactory(`${t('message.dataError')}`,`${t('message.notLessThan0')}`,'error')
         }else{
             // 查找当前编辑的原料是否已存在于 savedIngredients 中
             const index = savedIngredients.value.findIndex(item => item.name === selectingIngredient.name);
@@ -461,12 +463,13 @@ const { t, locale } = useI18n();
                 // 如果不存在，将其添加到 savedIngredients 中
                 savedIngredients.value.push({ ...selectingIngredient, unit: selectingUnit.value });
             }
+
+            notificationFactory(`${t('message.success')}`,`${t('message.configNotification.saved')}`,'success')
             // 关闭对话框
             configDialogVisible.value = false;
             // 重置 selectingIngredient 和 selectingUnit
             resetSelecting();
         }
-
     };
 
     // 移除选中的原料
@@ -480,6 +483,8 @@ const { t, locale } = useI18n();
         // 过滤掉未选中的原料
         const selectedNames = new Set(selectedIngredients.value);
         savedIngredients.value = savedIngredients.value.filter(saved => selectedNames.has(saved.name));
+
+        notificationFactory(`${t('message.success')}`,`${t('message.configNotification.removed')}`,'success')
     };
 
     // 取消配置的回调函数
@@ -495,8 +500,6 @@ const { t, locale } = useI18n();
         // 重置 selectingIngredient 和 selectingUnit
         resetSelecting();
     };
-
-
 
     // 根据 ABV 值返回对应的 CSS 类名
     const getABVClass = (abv) => {
@@ -529,7 +532,7 @@ const { t, locale } = useI18n();
 
         // 计算并更新 ABV 值
         CalculatedABV.value = totalVolume === 0 ? 0 : parseInt(((totalAlcoholVolume / totalVolume) * 100));
-        CalculatedVolume.value = totalVolume;
+        CalculatedVolume.value = parseInt(totalVolume)
         return CalculatedABV.value;
     };
 
@@ -571,11 +574,11 @@ const { t, locale } = useI18n();
         ABVCalc();
     }, { deep: true }); // 深度监听，确保对象内部属性的变化也能触发
 
-    const validationNotification = () => {
+    const notificationFactory = (title,message,type) => {
         ElNotification({
-            title: `${t('message.dataError')}`,
-            message: `${t('message.notLessThan0')}`,
-            type: 'error',
+            title,
+            message,
+            type,
         })
     }
 

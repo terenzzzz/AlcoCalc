@@ -29,7 +29,21 @@ export default {
         saveScreenshot: '保存图片',
         total: '总计',
 
-        savedReceipt: '保存的酒单',
-        clear:"清除"
+        savedRecipe: '保存的酒单',
+        clear:"清除",
+
+        success:'成功',
+        err: '错误',
+
+        configNotification:{
+            saved: '保存配置成功',
+            removed: '移除材料成功'
+        },
+
+        recipeNotification:{
+            saved: '配方已保存到本地',
+            removed: '配方已从本地移除',
+            cleared: '已清空本地存储的配方'
+        }
     }
 }
